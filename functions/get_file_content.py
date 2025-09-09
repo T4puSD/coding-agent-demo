@@ -1,6 +1,23 @@
 from pathlib import Path
+
+from google.genai import types
 from utils.util import is_within_working_dir
 from config.config import config
+
+
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description="Read file content in the specified file_path, constrained to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The file_path to read files from, relative to the working directory. This is a required parameter.",
+            ),
+        },
+    ),
+)
 
 
 def get_file_content(working_directory, file_path):
