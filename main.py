@@ -55,35 +55,74 @@ available_functions = types.Tool(
     ]
 )
 
-# create generation request to geminmi flash api
-response = client.models.generate_content(
-    model="gemini-2.0-flash-001",
-    contents=messages,
-    config=types.GenerateContentConfig(
-        tools=[available_functions], system_instruction=system_prompt
-    ),
-)
+max_iteration = 20
+while max_iteration > 0:
+    if max_iteration == 0:
+        print("Error: unable to produce answer with max iteration")
+        break
 
-# output
-
-if response.function_calls:
-    for function_call_part in response.function_calls:
-        function_call_result: types.Content = call_function(
-            function_call_part, is_verbose
+    try:
+        # create generation request to geminmi flash api
+        response: types.GenerateContentResponse = client.models.generate_content(
+            model="gemini-2.0-flash-001",
+            contents=messages,
+            config=types.GenerateContentConfig(
+                tools=[available_functions], system_instruction=system_prompt
+            ),
         )
 
-        if not function_call_result.parts[0].function_response.response:
-            raise Exception(
-                f"No response got from function calling {function_call_part.name}"
-            )
+        if is_verbose and response.usage_metadata:
+            print("\n\n")
+            print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+            print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
 
-        if is_verbose:
-            print(f"-> {function_call_result.parts[0].function_response.response}")
+        # output
+        if response.candidates:
+            for candidate in response.candidates:
+                if candidate and candidate.content:
+                    messages.append(candidate.content)
 
-else:
-    print(response.text)
+        if response.function_calls:
+            for function_call_part in response.function_calls:
+                function_call_result: types.Content = call_function(
+                    function_call_part, is_verbose
+                )
 
-if is_verbose:
-    print("\n\n")
-    print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-    print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+                if (
+                    not function_call_result
+                    or not function_call_result.parts
+                    or not function_call_result.parts[0]
+                    or not function_call_result.parts[0].function_response
+                    or not function_call_result.parts[0].function_response.response
+                ):
+                    raise Exception(
+                        f"No response got from function calling {function_call_part.name}"
+                    )
+
+                function_response = function_call_result.parts[
+                    0
+                ].function_response.response
+                function_response_text = str(function_response)
+
+                messages.append(
+                    types.Content(
+                        role="user",
+                        parts=[types.Part(text=function_response_text)],
+                    )
+                )
+
+                if is_verbose:
+                    print(
+                        f"-> {function_call_result.parts[0].function_response.response}"
+                    )
+        else:
+            if response.text:
+                print(response.text)
+            else:
+                print("Error: no response from model")
+            break
+    except Exception as e:
+        messages.append(
+            types.Content(role="user", parts=[types.Part(text=f"Error: {e}")])
+        )
+    max_iteration -= 1

@@ -13,3 +13,6 @@ wheels/
 !.env.demo
 .env
 .env.*
+
+# vscode
+.vscode/
