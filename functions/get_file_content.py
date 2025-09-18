@@ -32,12 +32,12 @@ def get_file_content(working_directory, file_path):
             return f'Error: File not found or is not a regular file: "{file_path}"'
 
         with file.open("r") as f:
-            file_content = f.read(config.FILE_CONTENT_MAX_READ_SIZE)
+            file_content = f.read(config.FILE_CONTENT_MAX_READ_CHARACTER)
 
             # if next 10 character read return data then it means
             # the file contains more data
             if f.read(10):
-                file_content += f'[...File "{file_path}" truncated at {config.FILE_CONTENT_MAX_READ_SIZE} characters]'
+                file_content += f'[...File "{file_path}" truncated at {config.FILE_CONTENT_MAX_READ_CHARACTER} characters]'
             return file_content
     except Exception as e:
         return f"Error: Unable to read file content. Cause: {e}"
