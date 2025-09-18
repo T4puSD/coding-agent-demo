@@ -27,7 +27,7 @@ api_key = config.GEMINI_API_KEY
 client = genai.Client(api_key=api_key)
 
 # system prompt
-system_prompt = """
+system_prompt = f"""
 You are a helpful AI coding agent.
 
 When a user asks a question or makes a request, make a function call plan without asking any question for clarification. You can perform the following operations:
@@ -37,7 +37,24 @@ When a user asks a question or makes a request, make a function call plan withou
 - Write new file or override existing file content
 - Execute python file with optional arguments
 
-All paths you provide should be relative to the working directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
+## Important notes:
+All paths you provide should be relative to the working directory `{config.AI_AGENT_WORKING_DIRECTORY}`. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
+
+### Ingore directories in your operations:
+- .git
+- __pycache__
+- .vscode
+- node_modules
+- .idea
+- dist
+- build
+- .venv
+- env
+- venv
+
+### Ignore files in your operations:
+- .env
+- .env.*
 """
 
 # prepare user prompt
