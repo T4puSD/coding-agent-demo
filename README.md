@@ -28,4 +28,4 @@ To install the AI Coding Agent, clone the repository and go inside of the repo a
 
 ## Additional Information
 
-For security purpose the AI coding agent is restricted to only the `calculator` directory via configuration. So any quries and tool calls perfomred by the AI will be limited to that directory only. You can change this with .evn configuration.
+For security purpose the AI coding agent is restricted to only the `calculator` directory via configuration. So any quries and tool calls perfomred by the AI will be limited to that directory only. You can change this with .env configuration.
